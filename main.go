@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -20,8 +19,12 @@ func main() {
 	reader := bufio.NewReader(f)
 	var line string
 	var lineCount int64
-	var wg sync.WaitGroup
-	guard := make(chan struct{}, 30)
+	var startTime time.Time
+	var endTime time.Time
+	startTime = time.Now()
+
+	// var wg sync.WaitGroup
+	// guard := make(chan struct{}, 100)
 	for {
 		line, err = reader.ReadString('\n')
 		if err == io.EOF {
@@ -43,26 +46,38 @@ func main() {
 		}
 		for _, row := range records {
 			//fmt.Println(row)
-			guard <- struct{}{}
-			wg.Add(1)
-			go func(row []string, wg *sync.WaitGroup) {
-				//inside here
-				<-guard
-				defer wg.Done()
-				data := &Testing{
-					FirstName:   row[0],
-					LastName:    row[1],
-					Phone:       row[2],
-					LastUpdated: formatDate(row[3]),
-				}
-				insertRow(data)
+			// guard <- struct{}{}
+			// wg.Add(1)
+			// go func(row []string, wg *sync.WaitGroup) {
+			// 	//inside here
+			// 	<-guard
+			// 	defer wg.Done()
+			// 	data := &Testing{
+			// 		FirstName:   row[0],
+			// 		LastName:    row[1],
+			// 		Phone:       row[2],
+			// 		LastUpdated: formatDate(row[3]),
+			// 	}
+			// 	insertRow(data)
 
-			}(row, &wg)
+			// }(row, &wg)
+
+			data := &Testing{
+				FirstName:   row[0],
+				LastName:    row[1],
+				Phone:       row[2],
+				LastUpdated: formatDate(row[3]),
+			}
+			insertRow(data)
 
 		}
 	}
-	fmt.Println("Finished")
-	wg.Wait()
+
+	//wg.Wait()
+	endTime = time.Now()
+	duration := endTime.Sub(startTime).Seconds()
+	fmt.Println("Finished at ", duration)
+
 }
 
 func formatDate(dateTime string) time.Time {
