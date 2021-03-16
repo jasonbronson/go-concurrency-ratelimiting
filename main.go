@@ -47,7 +47,7 @@ func main() {
 			wg.Add(1)
 			go func(row []string, wg *sync.WaitGroup) {
 				//inside here
-				<-guard
+				
 				defer wg.Done()
 				data := &Testing{
 					FirstName:   row[0],
@@ -56,6 +56,7 @@ func main() {
 					LastUpdated: formatDate(row[3]),
 				}
 				insertRow(data)
+				<-guard
 
 			}(row, &wg)
 
